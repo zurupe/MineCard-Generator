@@ -2,8 +2,9 @@ import { renderHook, waitFor, act } from '@testing-library/react';
 import { useSkin } from '../hooks/useSkin';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 
-// Mock fetch
-global.fetch = vi.fn();
+// Mock fetch using vi.stubGlobal for better TS compatibility
+const mockFetch = vi.fn();
+vi.stubGlobal('fetch', mockFetch);
 
 describe('useSkin hook', () => {
     beforeEach(() => {
@@ -18,7 +19,7 @@ describe('useSkin hook', () => {
 
     it('should fetch skin for valid username', async () => {
         const mockUuid = '069a79f4-44e9-4726-a5be-fca90e38aaf5';
-        (global.fetch as any).mockResolvedValue({
+        mockFetch.mockResolvedValue({
             ok: true,
             json: async () => ({
                 uuid: mockUuid,
@@ -38,7 +39,7 @@ describe('useSkin hook', () => {
     });
 
     it('should handle API errors by falling back to mc-heads directly', async () => {
-        (global.fetch as any).mockRejectedValue(new Error('API Down'));
+        mockFetch.mockRejectedValue(new Error('API Down'));
 
         const { result } = renderHook(() => useSkin());
 

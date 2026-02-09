@@ -1,6 +1,6 @@
 import React from 'react';
 import { Search, Upload } from 'lucide-react';
-import type { UseSkinResult, PoseType } from '../hooks/useSkin';
+import type { UseSkinResult, PoseType, ViewMode } from '../hooks/useSkin';
 import { useBackgrounds } from '../hooks/useBackgrounds';
 
 export interface CardState {
@@ -105,7 +105,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                     ].map((mode) => (
                         <button
                             key={mode.id}
-                            onClick={() => skinState.setViewMode(mode.id as any)}
+                            onClick={() => skinState.setViewMode(mode.id as ViewMode)}
                             className={`p-2 rounded text-[10px] uppercase border ${skinState.viewMode === mode.id
                                 ? 'bg-minecraft-green border-minecraft-green text-white'
                                 : 'bg-zinc-900 border-zinc-700 hover:border-zinc-500 text-zinc-400'

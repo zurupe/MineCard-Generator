@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 export interface Background {
     id: string;
@@ -48,13 +48,8 @@ const DEFAULT_BACKGROUNDS: Background[] = [
 ];
 
 export const useBackgrounds = () => {
-    const [backgrounds, setBackgrounds] = useState<Background[]>(DEFAULT_BACKGROUNDS);
-    const [loading, setLoading] = useState(false);
-
-    useEffect(() => {
-        setBackgrounds(DEFAULT_BACKGROUNDS);
-        setLoading(false);
-    }, []);
+    const [backgrounds] = useState<Background[]>(DEFAULT_BACKGROUNDS);
+    const [loading] = useState(false);
 
     return { backgrounds, loading };
 };

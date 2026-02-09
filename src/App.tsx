@@ -21,7 +21,7 @@ function App() {
   const handleExport = async () => {
     try {
       await exportCardAsPng('minecard-canvas', skinState.username);
-    } catch (error) {
+    } catch {
       alert('Error al exportar la tarjeta. Por favor intenta de nuevo.');
     }
   };
@@ -31,7 +31,7 @@ function App() {
       await copyCardAsImage('minecard-canvas');
       setCopyFeedback(true);
       setTimeout(() => setCopyFeedback(false), 2000);
-    } catch (error) {
+    } catch {
       alert('Error al copiar la tarjeta. Por favor intenta de nuevo.');
     }
   };
