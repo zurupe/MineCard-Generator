@@ -31,7 +31,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     skinState,
     cardState,
     setCardState,
-}) => {
+}: SidebarProps) => {
     const { backgrounds = [] } = useBackgrounds();
     const { username, setUsername, loading, error, pose, setPose } = skinState;
     const [inputValue, setInputValue] = React.useState(username);
@@ -42,7 +42,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         setUsername(inputValue);
     };
 
-    const updateCard = (field: keyof CardState, value: string) => {
+    const updateCard = <K extends keyof CardState>(field: K, value: CardState[K]) => {
         setCardState({ ...cardState, [field]: value });
     };
 
@@ -74,20 +74,17 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <div className="space-y-2">
                     <label className="text-xs uppercase tracking-wider text-zinc-400 font-bold">Orientación</label>
                     <div className="grid grid-cols-2 gap-2">
-                        {[
-                            { id: 'horizontal', label: 'Horizontal', icon: '↔️' },
-                            { id: 'vertical', label: 'Vertical', icon: '↕️' }
-                        ].map((o) => (
+                        {(['horizontal', 'vertical'] as const).map((id) => (
                             <button
-                                key={o.id}
-                                onClick={() => updateCard('orientation', o.id as any)}
-                                className={`p-2 rounded text-[10px] uppercase border transition-all flex items-center justify-center gap-2 ${cardState.orientation === o.id
+                                key={id}
+                                onClick={() => updateCard('orientation', id)}
+                                className={`p-2 rounded text-[10px] uppercase border transition-all flex items-center justify-center gap-2 ${cardState.orientation === id
                                     ? 'bg-minecraft-green border-minecraft-green text-white scale-[1.02]'
                                     : 'bg-zinc-900 border-zinc-700 hover:border-zinc-500 text-zinc-400'
                                     }`}
                             >
-                                <span>{o.icon}</span>
-                                <span>{o.label}</span>
+                                <span>{id === 'horizontal' ? '↔️' : '↕️'}</span>
+                                <span>{id === 'horizontal' ? 'Horizontal' : 'Vertical'}</span>
                             </button>
                         ))}
                     </div>
