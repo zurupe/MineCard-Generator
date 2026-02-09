@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Download, Copy } from 'lucide-react';
 import { useSkin } from './hooks/useSkin';
 import SkinViewer from './components/SkinViewer';
@@ -19,6 +19,14 @@ function App() {
   });
   const [copyFeedback, setCopyFeedback] = useState(false);
 
+  useEffect(() => {
+    const isMobile = window.innerWidth < window.innerHeight || window.innerWidth < 1024;
+    setCardState(prev => ({
+      ...prev,
+      orientation: isMobile ? 'vertical' : 'horizontal'
+    }));
+  }, []);
+
   const handleExport = async () => {
     try {
       await exportCardAsPng('minecard-canvas', skinState.username);
@@ -38,11 +46,12 @@ function App() {
   };
 
   return (
-    <div className="flex h-screen bg-zinc-900 overflow-hidden relative">
+    <div className={`flex bg-zinc-900 overflow-hidden relative ${cardState.orientation === 'vertical' ? 'h-screen flex-row' : 'h-screen flex-col lg:flex-row'}`}>
       <Sidebar
         skinState={skinState}
         cardState={cardState}
         setCardState={setCardState}
+        layout={cardState.orientation === 'horizontal' ? 'horizontal' : 'vertical'}
       />
 
       <div className="flex-1 overflow-y-auto flex flex-col items-center py-8 px-4 md:p-8 space-y-6">
@@ -63,8 +72,8 @@ function App() {
               model={skinState.skinData.model}
               pose={skinState.pose}
               viewMode={skinState.viewMode}
-              width={cardState.orientation === 'vertical' ? 300 : 350}
-              height={cardState.orientation === 'vertical' ? 360 : 420}
+              width={cardState.orientation === 'vertical' ? 320 : 380}
+              height={cardState.orientation === 'vertical' ? 380 : 440}
             />
           }
         />
