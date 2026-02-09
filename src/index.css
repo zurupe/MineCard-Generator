@@ -1,24 +1,39 @@
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-
 @import "tailwindcss";
+
+/* Custom theme variables */
+@theme {
+  --font-minecraft: 'Press Start 2P', cursive;
+  --color-minecraft-green: #3fb33f;
+  --color-minecraft-dirt: #795548;
+  --color-minecraft-stone: #9e9e9e;
+}
 
 :root {
   font-family: 'Press Start 2P', cursive;
   image-rendering: pixelated;
-  --minecraft-green: #3fb33f;
 }
 
 body {
-  @apply bg-zinc-900 text-white min-h-screen flex flex-col;
+  background-color: #18181b;
+  color: white;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   margin: 0;
 }
 
+/* Minecraft themed utility classes */
 .text-minecraft-green {
-  color: var(--minecraft-green);
+  color: var(--color-minecraft-green);
 }
 
 .bg-minecraft-green {
-  background-color: var(--minecraft-green);
+  background-color: var(--color-minecraft-green);
+}
+
+.border-minecraft-green {
+  border-color: var(--color-minecraft-green);
 }
 
 /* Custom Scrollbar */
@@ -27,13 +42,34 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-zinc-900;
+  background-color: #18181b;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-zinc-700 rounded-full;
+  background-color: #3f3f46;
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-zinc-600;
+  background-color: #52525b;
+}
+
+/* Smooth transitions for interactive elements */
+button,
+input,
+textarea {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Focus styles for accessibility */
+input:focus,
+textarea:focus,
+button:focus {
+  outline: 2px solid var(--color-minecraft-green);
+  outline-offset: 2px;
+}
+
+/* Card canvas shadow effect */
+#minecard-canvas {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }

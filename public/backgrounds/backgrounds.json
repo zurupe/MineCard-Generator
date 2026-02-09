@@ -1,0 +1,38 @@
+[
+  {
+    "id": "plains",
+    "name": "Plains Biome",
+    "url": "/backgrounds/plains.svg",
+    "color": "#90EE90"
+  },
+  {
+    "id": "forest",
+    "name": "Forest Biome",
+    "url": "/backgrounds/forest.svg",
+    "color": "#228B22"
+  },
+  {
+    "id": "desert",
+    "name": "Desert Biome",
+    "url": "/backgrounds/desert.svg",
+    "color": "#EDC9AF"
+  },
+  {
+    "id": "ocean",
+    "name": "Ocean Biome",
+    "url": "/backgrounds/ocean.svg",
+    "color": "#1E90FF"
+  },
+  {
+    "id": "nether",
+    "name": "Nether",
+    "url": "/backgrounds/nether.svg",
+    "color": "#8B0000"
+  },
+  {
+    "id": "end",
+    "name": "The End",
+    "url": "/backgrounds/end.svg",
+    "color": "#2F1B47"
+  }
+]

@@ -5,6 +5,9 @@ interface SkinData {
     model: 'classic' | 'slim';
 }
 
+export type ViewMode = 'head-2d' | 'full-body';
+export type PoseType = 'standing' | 'waving' | 'jumping' | 'pointing' | 'crossed' | 'relaxed';
+
 export interface UseSkinResult {
     username: string;
     setUsername: (name: string) => void;
@@ -12,9 +15,14 @@ export interface UseSkinResult {
     loading: boolean;
     error: string | null;
     skinData: SkinData;
+    viewMode: ViewMode;
+    setViewMode: (mode: ViewMode) => void;
+    pose: PoseType;
+    setPose: (pose: PoseType) => void;
+    uploadSkin: (file: File) => void;
 }
 
-const DEFAULT_SKIN = 'https://textures.minecraft.net/texture/31f477eb1a695665b161c6b1a134d3522f60473e0a2977469602497042a578'; // Steve
+const DEFAULT_SKIN = 'https://mc-heads.net/skin/Steve';
 const STEVE_MODEL = 'classic';
 
 export const useSkin = (): UseSkinResult => {
@@ -22,13 +30,26 @@ export const useSkin = (): UseSkinResult => {
     const [debouncedName, setDebouncedName] = useState<string>('Steve');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [viewMode, setViewMode] = useState<ViewMode>('full-body');
+    const [pose, setPose] = useState<PoseType>('waving');
     const [skinData, setSkinData] = useState<SkinData>({
         textureUrl: DEFAULT_SKIN,
         model: STEVE_MODEL,
     });
 
+    const uploadSkin = (file: File) => {
+        const url = URL.createObjectURL(file);
+        setSkinData({
+            textureUrl: url,
+            model: 'classic',
+        });
+        setUsername('Custom Skin');
+        setError(null);
+    };
+
     // Debounce username input
     useEffect(() => {
+        if (username === 'Custom Skin') return;
         const timer = setTimeout(() => {
             setDebouncedName(username);
         }, 800);
@@ -37,7 +58,6 @@ export const useSkin = (): UseSkinResult => {
 
     useEffect(() => {
         const fetchSkin = async () => {
-            // Basic validation: 3-16 chars, alphanumeric + _
             const validRegex = /^[a-zA-Z0-9_]{3,16}$/;
 
             if (!validRegex.test(debouncedName)) {
@@ -55,15 +75,22 @@ export const useSkin = (): UseSkinResult => {
                 }
 
                 const data = await response.json();
-                // Use Crafatar as a proxy to avoid CORS issues with textures.minecraft.net
-                const textureUrl = `https://crafatar.com/skins/${data.uuid}`;
-                const model = data.textures.slim ? 'slim' : 'classic';
+                const textureUrl = `https://mc-heads.net/skin/${data.uuid}`;
+                const model = data.textures?.slim ? 'slim' : 'classic';
 
                 setSkinData({ textureUrl, model });
             } catch (err) {
-                console.error(err);
-                setError('User not found, using Steve.');
-                setSkinData({ textureUrl: DEFAULT_SKIN, model: STEVE_MODEL });
+                console.error('Error fetching skin:', err);
+                setError('User not found or API error. Using default.');
+
+                if (debouncedName.length >= 3 && debouncedName.length <= 16) {
+                    setSkinData({
+                        textureUrl: `https://mc-heads.net/skin/${debouncedName}`,
+                        model: STEVE_MODEL
+                    });
+                } else {
+                    setSkinData({ textureUrl: DEFAULT_SKIN, model: STEVE_MODEL });
+                }
             } finally {
                 setLoading(false);
             }
@@ -80,6 +107,11 @@ export const useSkin = (): UseSkinResult => {
         isValid: !error,
         loading,
         error,
-        skinData
+        skinData,
+        viewMode,
+        setViewMode,
+        pose,
+        setPose,
+        uploadSkin
     };
 };

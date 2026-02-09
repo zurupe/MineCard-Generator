@@ -1,15 +1,14 @@
 import { useState } from 'react';
-import { Download } from 'lucide-react';
+import { Download, Copy } from 'lucide-react';
 import { useSkin } from './hooks/useSkin';
 import SkinViewer from './components/SkinViewer';
 import Sidebar from './components/Sidebar';
 import type { CardState } from './components/Sidebar';
 import CardCanvas from './components/CardCanvas';
-import { exportCardAsPng } from './utils/export';
+import { exportCardAsPng, copyCardAsImage } from './utils/export';
 
 function App() {
   const skinState = useSkin();
-  const [animation, setAnimation] = useState<'idle' | 'walk' | 'run' | 'none'>('idle');
   const [cardState, setCardState] = useState<CardState>({
     recipient: '',
     message: '',
@@ -17,6 +16,7 @@ function App() {
     backgroundImage: '',
     textColor: '#ffffff',
   });
+  const [copyFeedback, setCopyFeedback] = useState(false);
 
   const handleExport = async () => {
     try {
@@ -26,14 +26,22 @@ function App() {
     }
   };
 
+  const handleCopy = async () => {
+    try {
+      await copyCardAsImage('minecard-canvas');
+      setCopyFeedback(true);
+      setTimeout(() => setCopyFeedback(false), 2000);
+    } catch (error) {
+      alert('Error al copiar la tarjeta. Por favor intenta de nuevo.');
+    }
+  };
+
   return (
     <div className="flex h-screen">
       <Sidebar
         skinState={skinState}
         cardState={cardState}
         setCardState={setCardState}
-        setAnimation={setAnimation}
-        currentAnimation={animation}
       />
 
       <div className="flex-1 flex flex-col items-center justify-center p-8 space-y-6 bg-zinc-900">
@@ -46,25 +54,37 @@ function App() {
           backgroundImage={cardState.backgroundImage}
           textColor={cardState.textColor}
           skinElement={
-            <div className="scale-75 origin-bottom">
-              <SkinViewer
-                skinUrl={skinState.skinData.textureUrl}
-                model={skinState.skinData.model}
-                animation={animation}
-                width={300}
-                height={350}
-              />
-            </div>
+            <SkinViewer
+              skinUrl={skinState.skinData.textureUrl}
+              model={skinState.skinData.model}
+              pose={skinState.pose}
+              viewMode={skinState.viewMode}
+              width={350}
+              height={420}
+            />
           }
         />
 
-        <button
-          onClick={handleExport}
-          className="flex items-center gap-2 bg-minecraft-green hover:bg-green-600 text-white px-6 py-3 rounded-lg font-bold transition-colors shadow-lg"
-        >
-          <Download size={20} />
-          DESCARGAR TARJETA
-        </button>
+        <div className="flex gap-4">
+          <button
+            onClick={handleExport}
+            className="flex items-center gap-2 bg-minecraft-green hover:bg-green-600 text-white px-6 py-3 rounded-lg font-bold transition-colors shadow-lg"
+          >
+            <Download size={20} />
+            DESCARGAR TARJETA
+          </button>
+
+          <button
+            onClick={handleCopy}
+            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-bold transition-colors shadow-lg ${copyFeedback
+              ? 'bg-blue-500 text-white'
+              : 'bg-blue-600 hover:bg-blue-700 text-white'
+              }`}
+          >
+            <Copy size={20} />
+            {copyFeedback ? 'COPIADO!' : 'COPIAR'}
+          </button>
+        </div>
 
         <p className="text-xs text-zinc-500">
           Usuario: <span className="text-white font-mono">{skinState.username}</span>

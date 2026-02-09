@@ -1,6 +1,7 @@
 import React from 'react';
-import { Search } from 'lucide-react';
-import type { UseSkinResult } from '../hooks/useSkin';
+import { Search, Upload } from 'lucide-react';
+import type { UseSkinResult, PoseType } from '../hooks/useSkin';
+import { useBackgrounds } from '../hooks/useBackgrounds';
 
 export interface CardState {
     recipient: string;
@@ -14,18 +15,24 @@ interface SidebarProps {
     skinState: UseSkinResult;
     cardState: CardState;
     setCardState: (state: CardState) => void;
-    setAnimation: (anim: 'idle' | 'walk' | 'run' | 'none') => void;
-    currentAnimation: 'idle' | 'walk' | 'run' | 'none';
 }
+
+const POSES: { id: PoseType; label: string; emoji: string }[] = [
+    { id: 'standing', label: 'De Pie', emoji: '🧍' },
+    { id: 'waving', label: 'Saludando', emoji: '👋' },
+    { id: 'jumping', label: 'Saltando', emoji: '🦘' },
+    { id: 'pointing', label: 'Señalando', emoji: '👉' },
+    { id: 'crossed', label: 'Cruzado', emoji: '🤞' },
+    { id: 'relaxed', label: 'Relajado', emoji: '😌' },
+];
 
 const Sidebar: React.FC<SidebarProps> = ({
     skinState,
     cardState,
     setCardState,
-    setAnimation,
-    currentAnimation
 }) => {
-    const { username, setUsername, loading, error } = skinState;
+    const { backgrounds = [] } = useBackgrounds();
+    const { username, setUsername, loading, error, pose, setPose } = skinState;
     const [inputValue, setInputValue] = React.useState(username);
 
     const handleSearch = (e: React.FormEvent) => {
@@ -42,8 +49,22 @@ const Sidebar: React.FC<SidebarProps> = ({
             <h2 className="text-xl text-minecraft-green font-bold">Controls</h2>
 
             {/* Skin Section */}
-            <div className="space-y-2">
-                <label className="text-xs uppercase tracking-wider text-zinc-400 font-bold">Minecraft User</label>
+            <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                    <label className="text-xs uppercase tracking-wider text-zinc-400 font-bold">Minecraft User</label>
+                    <label className="cursor-pointer bg-zinc-700 hover:bg-zinc-600 p-1.5 rounded transition-colors text-zinc-200" title="Subir Skin (.png)">
+                        <Upload size={14} />
+                        <input
+                            type="file"
+                            accept="image/png"
+                            className="hidden"
+                            onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) skinState.uploadSkin(file);
+                            }}
+                        />
+                    </label>
+                </div>
                 <form onSubmit={handleSearch} className="flex gap-2">
                     <input
                         type="text"
@@ -74,24 +95,49 @@ const Sidebar: React.FC<SidebarProps> = ({
                 )}
             </div>
 
-            {/* Pose Section */}
-            <div className="space-y-2">
-                <label className="text-xs uppercase tracking-wider text-zinc-400 font-bold">Pose</label>
+            {/* View Mode Section */}
+            <div className="space-y-2 border-t border-zinc-700 pt-4">
+                <label className="text-xs uppercase tracking-wider text-zinc-400 font-bold">Vista de Skin</label>
                 <div className="grid grid-cols-2 gap-2">
-                    {['idle', 'walk', 'run', 'none'].map((anim) => (
+                    {[
+                        { id: 'head-2d', label: '🎭 Cabeza 2D' },
+                        { id: 'full-body', label: '🧍 Cuerpo Completo' }
+                    ].map((mode) => (
                         <button
-                            key={anim}
-                            onClick={() => setAnimation(anim as any)}
-                            className={`p-2 rounded text-xs capitalize border ${currentAnimation === anim
-                                ? 'bg-minecraft-green border-minecraft-green'
-                                : 'bg-zinc-900 border-zinc-700 hover:border-zinc-500'
+                            key={mode.id}
+                            onClick={() => skinState.setViewMode(mode.id as any)}
+                            className={`p-2 rounded text-[10px] uppercase border ${skinState.viewMode === mode.id
+                                ? 'bg-minecraft-green border-minecraft-green text-white'
+                                : 'bg-zinc-900 border-zinc-700 hover:border-zinc-500 text-zinc-400'
                                 }`}
                         >
-                            {anim}
+                            {mode.label}
                         </button>
                     ))}
                 </div>
             </div>
+
+            {/* Pose Section - only show for full-body */}
+            {skinState.viewMode === 'full-body' && (
+                <div className="space-y-2">
+                    <label className="text-xs uppercase tracking-wider text-zinc-400 font-bold">Pose</label>
+                    <div className="grid grid-cols-2 gap-2">
+                        {POSES.map((p) => (
+                            <button
+                                key={p.id}
+                                onClick={() => setPose(p.id)}
+                                className={`p-2 rounded text-[10px] border flex items-center justify-center gap-1 ${pose === p.id
+                                    ? 'bg-minecraft-green border-minecraft-green text-white'
+                                    : 'bg-zinc-900 border-zinc-700 hover:border-zinc-500 text-zinc-400'
+                                    }`}
+                            >
+                                <span>{p.emoji}</span>
+                                <span>{p.label}</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {/* Card Content Section */}
             <div className="border-t border-zinc-700 pt-4 space-y-4">
@@ -134,15 +180,9 @@ const Sidebar: React.FC<SidebarProps> = ({
                     >
                         Solid
                     </button>
-                    {[
-                        { name: 'Plains', url: 'https://minecraft.wiki/images/thumb/Plains_Biome.png/300px-Plains_Biome.png' },
-                        { name: 'Forest', url: 'https://minecraft.wiki/images/thumb/Forest_Biome.png/300px-Forest_Biome.png' },
-                        { name: 'Desert', url: 'https://minecraft.wiki/images/thumb/Desert_Biome.png/300px-Desert_Biome.png' },
-                        { name: 'Nether', url: 'https://minecraft.wiki/images/thumb/Nether_Wastes_Biome.png/300px-Nether_Wastes_Biome.png' },
-                        { name: 'The End', url: 'https://minecraft.wiki/images/thumb/The_End_Biome.png/300px-The_End_Biome.png' }
-                    ].map((bg) => (
+                    {backgrounds.map((bg) => (
                         <button
-                            key={bg.name}
+                            key={bg.id}
                             onClick={() => updateCard('backgroundImage', bg.url)}
                             className={`p-2 rounded text-[10px] uppercase border truncate ${cardState.backgroundImage === bg.url ? 'border-minecraft-green bg-zinc-900 text-minecraft-green' : 'border-zinc-700 bg-zinc-900 text-zinc-400'}`}
                             title={bg.name}
