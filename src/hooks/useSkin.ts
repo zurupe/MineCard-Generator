@@ -22,12 +22,12 @@ export interface UseSkinResult {
     uploadSkin: (file: File) => void;
 }
 
-const DEFAULT_SKIN = 'https://mc-heads.net/skin/Steve';
+const DEFAULT_SKIN = 'https://mc-heads.net/skin/Notch';
 const STEVE_MODEL = 'classic';
 
 export const useSkin = (): UseSkinResult => {
-    const [username, setUsername] = useState<string>('Steve');
-    const [debouncedName, setDebouncedName] = useState<string>('Steve');
+    const [username, setUsername] = useState<string>('Notch');
+    const [debouncedName, setDebouncedName] = useState<string>('Notch');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [viewMode, setViewMode] = useState<ViewMode>('full-body');

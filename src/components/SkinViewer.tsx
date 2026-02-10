@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ReactSkinview3d as Skinview3d } from 'react-skinview3d';
 import type { SkinViewer as SkinViewerInstance } from 'skinview3d';
 
@@ -11,6 +11,13 @@ interface SkinViewerProps {
     viewMode: ViewMode;
     width?: number;
     height?: number;
+    zoom?: number;
+    headScale?: number;
+    headOffsetX?: number;
+    headOffsetY?: number;
+    bodyOffsetX?: number;
+    bodyOffsetY?: number;
+    cameraDistance?: number;
 }
 
 // Static pose configurations (rotation values in radians)
@@ -71,21 +78,28 @@ const SkinViewer: React.FC<SkinViewerProps> = ({
     pose,
     viewMode,
     width = 300,
-    height = 400
+    height = 400,
+    zoom = 2.9,
+    headScale = 1.0,
+    headOffsetX = 0,
+    headOffsetY = 0,
+    bodyOffsetX = 0,
+    bodyOffsetY = 0,
+    cameraDistance = 30
 }) => {
-    const viewerRef = useRef<SkinViewerInstance | null>(null);
+    const [viewer, setViewer] = useState<SkinViewerInstance | null>(null);
 
     useEffect(() => {
-        if (viewerRef.current && viewMode === 'full-body') {
-            const viewer = viewerRef.current;
+        if (viewer && viewMode === 'full-body') {
             const poseData = POSES[pose] || POSES.standing;
 
             // Apply static pose
             viewer.animation = null;
 
-            // Configure camera for full body centered view
-            viewer.zoom = 0.9;
-            viewer.camera.position.set(0, 5, 45);
+            // Configure camera
+            viewer.zoom = zoom;
+            viewer.controls.enableZoom = true; // Enable interactive zoom again
+            viewer.camera.position.set(0, 10, cameraDistance);
             viewer.controls.target.set(0, 10, 0);
             viewer.controls.autoRotate = false;
             viewer.controls.enableRotate = true;
@@ -102,7 +116,7 @@ const SkinViewer: React.FC<SkinViewerProps> = ({
                 }
             }
         }
-    }, [pose, viewMode]);
+    }, [pose, viewMode, zoom, viewer, cameraDistance]);
 
     // Render 2D head view
     if (viewMode === 'head-2d') {
@@ -115,14 +129,21 @@ const SkinViewer: React.FC<SkinViewerProps> = ({
 
         return (
             <div
-                style={{ width, height }}
-                className="flex items-center justify-center bg-transparent overflow-hidden"
+                style={{
+                    width,
+                    height,
+                    transform: `translate(${headOffsetX}px, ${headOffsetY}px)`
+                }}
+                className="flex items-center justify-center bg-transparent overflow-hidden transition-transform duration-300"
             >
                 <img
                     src={displayUrl}
                     alt="Skin Head"
                     className="max-w-full max-h-full transition-all duration-500 hover:scale-110 drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)]"
-                    style={{ imageRendering: 'pixelated' }}
+                    style={{
+                        imageRendering: 'pixelated',
+                        transform: `scale(${headScale})`
+                    }}
                 />
             </div>
         );
@@ -130,35 +151,26 @@ const SkinViewer: React.FC<SkinViewerProps> = ({
 
     // Render 3D full-body view
     return (
-        <Skinview3d
-            skinUrl={skinUrl}
-            height={height}
-            width={width}
-            onReady={({ viewer }) => {
-                viewerRef.current = viewer;
-                // Trigger pose application after viewer is ready
-                const poseData = POSES[pose] || POSES.standing;
-                viewer.animation = null;
-                viewer.zoom = 0.9;
-                viewer.camera.position.set(0, 5, 45);
-                viewer.controls.target.set(0, 10, 0);
-
-                if (viewer.playerObject?.skin) {
-                    const skin = viewer.playerObject.skin;
-                    skin.head.rotation.set(...poseData.head);
-                    skin.leftArm.rotation.set(...poseData.leftArm);
-                    skin.rightArm.rotation.set(...poseData.rightArm);
-                    skin.leftLeg.rotation.set(...poseData.leftLeg);
-                    skin.rightLeg.rotation.set(...poseData.rightLeg);
-                }
-            }}
-            options={{
-                model: model === 'slim' ? 'slim' : 'default',
-                zoom: 0.9,
-                enableControls: true,
-                preserveDrawingBuffer: true, // Required for screenshot/export
-            }}
-        />
+        <div style={{ transform: `translate(${bodyOffsetX}px, ${bodyOffsetY}px)` }} className="transition-transform duration-300">
+            <Skinview3d
+                skinUrl={skinUrl}
+                height={height}
+                width={width}
+                onReady={({ viewer }) => {
+                    setViewer(viewer);
+                    // Initial setup
+                    viewer.controls.enableZoom = true;
+                    viewer.zoom = zoom;
+                    viewer.camera.position.set(0, 10, cameraDistance);
+                }}
+                options={{
+                    model: model === 'slim' ? 'slim' : 'default',
+                    zoom: zoom,
+                    enableControls: true,
+                    preserveDrawingBuffer: true,
+                }}
+            />
+        </div>
     );
 };
 

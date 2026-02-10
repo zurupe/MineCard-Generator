@@ -16,8 +16,9 @@ interface SidebarProps {
     skinState: UseSkinResult;
     cardState: CardState;
     setCardState: (state: CardState) => void;
-    layout?: 'vertical' | 'horizontal';
+    version?: string;
 }
+
 
 const POSES: { id: PoseType; label: string; emoji: string }[] = [
     { id: 'standing', label: 'De Pie', emoji: '🧍' },
@@ -32,8 +33,8 @@ const Sidebar: React.FC<SidebarProps> = ({
     skinState,
     cardState,
     setCardState,
-    layout = 'vertical',
-}: SidebarProps) => {
+    version = "v1.0"
+}) => {
     const { backgrounds = [] } = useBackgrounds();
     const { username, setUsername, loading, error, pose, setPose } = skinState;
     const [inputValue, setInputValue] = useState(username);
@@ -67,39 +68,38 @@ const Sidebar: React.FC<SidebarProps> = ({
             )}
 
             <div className={`
-                fixed lg:relative z-40 bg-zinc-800 border-zinc-700 overflow-auto transition-transform duration-300
-                ${layout === 'vertical'
-                    ? 'h-full w-80 p-6 flex flex-col gap-6 border-r'
-                    : 'w-full h-auto lg:h-72 p-4 flex flex-col lg:flex-row gap-4 border-t lg:order-last'
-                }
+                fixed lg:relative z-40 h-full w-80 bg-zinc-800 p-6 flex flex-col gap-6 border-r border-zinc-700 overflow-y-auto transition-transform duration-300
                 ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
             `}>
-                <h2 className={`text-xl text-minecraft-green font-bold ${layout === 'horizontal' ? 'lg:hidden' : ''}`}>Controls</h2>
+                <h2 className="text-xl text-minecraft-green font-bold">Controls</h2>
+                <p className="text-[8px] text-zinc-500 uppercase tracking-widest font-minecraft -mt-1">
+                    Minecard Generator {version}
+                </p>
 
-                <div className={`${layout === 'horizontal' ? 'flex flex-row flex-wrap gap-6 items-start w-full overflow-x-auto pb-4 lg:pb-0' : 'flex flex-col gap-6'}`}>
+                <div className="flex flex-col gap-6">
 
                     {/* Orientation Toggle */}
-                    <div className={`space-y-2 ${layout === 'horizontal' ? 'min-w-[150px]' : ''}`}>
-                        <label className="text-xs uppercase tracking-wider text-zinc-400 font-bold text-nowrap">Orientación</label>
+                    <div className="space-y-2">
+                        <label className="text-xs uppercase tracking-wider text-zinc-400 font-bold">Orientación</label>
                         <div className="grid grid-cols-2 gap-2">
                             {(['horizontal', 'vertical'] as const).map((id) => (
                                 <button
                                     key={id}
                                     onClick={() => updateCard('orientation', id)}
-                                    className={`p-1.5 rounded text-[10px] uppercase border transition-all flex items-center justify-center gap-2 ${cardState.orientation === id
+                                    className={`p-2 rounded text-[10px] uppercase border transition-all flex items-center justify-center gap-2 ${cardState.orientation === id
                                         ? 'bg-minecraft-green border-minecraft-green text-white scale-[1.02]'
                                         : 'bg-zinc-900 border-zinc-700 hover:border-zinc-500 text-zinc-400'
                                         }`}
                                 >
                                     <span>{id === 'horizontal' ? '↔️' : '↕️'}</span>
-                                    <span className={layout === 'horizontal' ? 'hidden sm:inline' : ''}>{id === 'horizontal' ? 'Horiz.' : 'Vert.'}</span>
+                                    <span>{id === 'horizontal' ? 'Horizontal' : 'Vertical'}</span>
                                 </button>
                             ))}
                         </div>
                     </div>
 
                     {/* Skin Section */}
-                    <div className={`space-y-4 ${layout === 'horizontal' ? 'min-w-[200px]' : 'border-t border-zinc-700 pt-4'}`}>
+                    <div className="space-y-4 border-t border-zinc-700 pt-4">
                         <div className="flex items-center justify-between">
                             <label className="text-xs uppercase tracking-wider text-zinc-400 font-bold">Minecraft User</label>
                             <label className="cursor-pointer bg-zinc-700 hover:bg-zinc-600 p-1.5 rounded transition-colors text-zinc-200" title="Subir Skin (.png)">
@@ -140,7 +140,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                     </div>
 
                     {/* View Mode & Pose Section */}
-                    <div className={`space-y-4 ${layout === 'horizontal' ? 'min-w-[250px]' : 'border-t border-zinc-700 pt-4'}`}>
+                    <div className="space-y-4 border-t border-zinc-700 pt-4">
                         <div className="space-y-2">
                             <label className="text-xs uppercase tracking-wider text-zinc-400 font-bold">Vista</label>
                             <div className="grid grid-cols-2 gap-2">
@@ -148,7 +148,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                                     <button
                                         key={mode}
                                         onClick={() => skinState.setViewMode(mode)}
-                                        className={`p-1.5 rounded text-[10px] uppercase border transition-all ${skinState.viewMode === mode
+                                        className={`p-2 rounded text-[10px] uppercase border transition-all ${skinState.viewMode === mode
                                             ? 'bg-minecraft-green border-minecraft-green text-white scale-[1.02]'
                                             : 'bg-zinc-900 border-zinc-700 hover:border-zinc-500 text-zinc-400'
                                             }`}
@@ -181,9 +181,9 @@ const Sidebar: React.FC<SidebarProps> = ({
                     </div>
 
                     {/* Card Content Section */}
-                    <div className={`space-y-4 ${layout === 'horizontal' ? 'min-w-[300px] flex-1' : 'border-t border-zinc-700 pt-4'}`}>
-                        <div className="flex gap-2">
-                            <div className="flex-1 space-y-1">
+                    <div className="space-y-4 border-t border-zinc-700 pt-4">
+                        <div className="space-y-2">
+                            <div className="space-y-1">
                                 <label className="text-[10px] text-zinc-400 uppercase font-bold">Para</label>
                                 <input
                                     type="text"
@@ -194,25 +194,25 @@ const Sidebar: React.FC<SidebarProps> = ({
                                     placeholder="Nombre"
                                 />
                             </div>
-                            <div className="flex-[2] space-y-1">
+                            <div className="space-y-1">
                                 <label className="text-[10px] text-zinc-400 uppercase font-bold">Mensaje</label>
                                 <textarea
                                     maxLength={280}
                                     value={cardState.message}
                                     onChange={(e) => updateCard('message', e.target.value)}
-                                    className={`w-full bg-zinc-900 border border-zinc-700 rounded p-2 text-white focus:outline-none focus:border-minecraft-green text-sm resize-none ${layout === 'horizontal' ? 'h-10' : 'h-24'}`}
-                                    placeholder="Escribe..."
+                                    className="w-full h-24 bg-zinc-900 border border-zinc-700 rounded p-2 text-white focus:outline-none focus:border-minecraft-green text-sm resize-none"
+                                    placeholder="Escribe tu mensaje..."
                                 />
                             </div>
                         </div>
                     </div>
 
                     {/* Background & Colors Section */}
-                    <div className={`space-y-4 ${layout === 'horizontal' ? 'min-w-[280px]' : 'border-t border-zinc-700 pt-4'}`}>
+                    <div className="space-y-4 border-t border-zinc-700 pt-4 pb-12 lg:pb-0">
                         <div className="space-y-2">
                             <label className="text-xs uppercase tracking-wider text-zinc-400 font-bold">Fondo & Colores</label>
-                            <div className="flex gap-2">
-                                <div className="flex-1 space-y-1">
+                            <div className="grid grid-cols-2 gap-2">
+                                <div className="space-y-1">
                                     <label className="text-[10px] text-zinc-500">Card</label>
                                     <input
                                         type="color"
@@ -221,7 +221,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                                         className="w-full h-8 rounded cursor-pointer border-2 border-zinc-700 bg-zinc-900 p-0.5"
                                     />
                                 </div>
-                                <div className="flex-1 space-y-1">
+                                <div className="space-y-1">
                                     <label className="text-[10px] text-zinc-500">Texto</label>
                                     <input
                                         type="color"
@@ -230,17 +230,21 @@ const Sidebar: React.FC<SidebarProps> = ({
                                         className="w-full h-8 rounded cursor-pointer border-2 border-zinc-700 bg-zinc-900 p-0.5"
                                     />
                                 </div>
-                                <div className="flex-[2] space-y-1">
-                                    <label className="text-[10px] text-zinc-500">Imagen</label>
-                                    <select
-                                        className="w-full bg-zinc-900 border border-zinc-700 rounded p-1 text-[10px] text-zinc-300 h-8"
-                                        value={cardState.backgroundImage}
-                                        onChange={(e) => updateCard('backgroundImage', e.target.value)}
-                                    >
-                                        <option value="">Sólido</option>
-                                        {backgrounds.map(bg => <option key={bg.id} value={bg.url}>{bg.name}</option>)}
-                                    </select>
-                                </div>
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-[10px] text-zinc-500">Imagen de Fondo</label>
+                                <select
+                                    className="w-full bg-zinc-900 border border-zinc-700 rounded p-2 text-xs text-zinc-300"
+                                    value={cardState.backgroundImage}
+                                    onChange={(e) => updateCard('backgroundImage', e.target.value)}
+                                >
+                                    <option value="">Color Sólido</option>
+                                    {backgrounds.map(bg => (
+                                        <option key={bg.id} value={bg.url}>
+                                            {bg.name}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
                         </div>
                     </div>
